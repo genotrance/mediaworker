@@ -1,0 +1,7 @@
+Media Worker is a simple tool that helps automate organizing photos and videos.
+
+Dependencies
+------------
+Requires Python 2.6
+
+Requires Exiv2.exe and libexpat.dll available from http://www.exiv2.org/download.html
