@@ -7,7 +7,7 @@ import sys
 import time
 
 from multiprocessing import Queue, Process
-from Queue import Empty
+from queue import Empty
 
 # Defines
 DTORIG = "Exif.Photo.DateTimeOriginal"
@@ -18,11 +18,11 @@ DT = "Exif.Image.DateTime"
 # Configuration
 OPERATION = "move"
 PHOTO = "photos"
-PHOTODST = "%Y/%m - %b/%d/%Y-%m-%d_%H%M%S"
+PHOTODST = "%Y/%m - %b/%Y-%m-%d_%H%M%S"
 PHOTOMASK = "jpg"
 VIDEO = "videos"
 VIDEODST = "%Y/%m - %b/%Y-%m-%d_"
-VIDEOMASK = "mov,avi"
+VIDEOMASK = "mov,avi,mp4"
 
 class photo:
     def __init__(self, src, dst, queue):
@@ -35,7 +35,7 @@ class photo:
         for ext in PHOTOMASK.split(","):
             pipe = subprocess.Popen("exiv2.exe -PEIXkt \"%s\\*.%s\"" % (path, ext), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
             if pipe != None:
-                lines = pipe.read()
+                lines = pipe.read().decode("UTF-8")
                 for line in lines.split("\n"):
                     if "DateTime" in line:
                         for i in [DTORIG, DTDIG, DTDIG2, DT]:
@@ -47,7 +47,7 @@ class photo:
                                 try:
                                     exifdata[match[0]][i] = time.strptime(match[1], "%Y:%m:%d %H:%M:%S")
                                 except:
-                                    print "Error with %s format" % match[1].strip()
+                                    print("Error with %s format" % match[1].strip())
 
         return exifdata
 
@@ -67,7 +67,7 @@ class photo:
                 })
 
     def recurse(self, src, dst):
-        print "Processing %s" % printpath(src)
+        print("Processing %s" % printpath(src))
 
         exifdata = self.getexif(src)
         if exifdata != {}:
@@ -105,7 +105,7 @@ class video:
             })
 
     def recurse(self, src, dst):
-        print "Processing %s" % printpath(src)
+        print("Processing %s" % printpath(src))
 
         datedata = self.getdate(src)
         if datedata != {}:
@@ -130,7 +130,7 @@ class rmdir:
         })
 
     def recurse(self, src):
-        print "Processing %s" % printpath(src)
+        print("Processing %s" % printpath(src))
 
         basename = os.path.basename(src)
         if basename in self.pattern:
@@ -168,7 +168,7 @@ class processor:
             except Empty:
                 time.sleep(0.05)
             except:
-                print "Error with job: %s" % job
+                print("Error with job: %s" % job)
                 continue
 
     def copy(self, job, move=False):
@@ -191,11 +191,11 @@ class processor:
         dst = dst + unique + ext
 
         if move == True:
-            print "Moving %s" % printpath(src)
+            print("Moving %s" % printpath(src))
         else:
-            print "Copying %s" % printpath(src)
+            print("Copying %s" % printpath(src))
 
-        print "    ==> %s" % printpath(dst)
+        print("    ==> %s" % printpath(dst))
 
         try:
             if move == True:
@@ -213,7 +213,7 @@ class processor:
     def rmdir(self, job):
         src = job["src"]
 
-        print "Deleting %s" % printpath(src)
+        print("Deleting %s" % printpath(src))
 
         try:
             shutil.rmtree(src)
@@ -223,8 +223,8 @@ class processor:
         return True
 
 def help():
-    print "Syntax: mediaworker photo,video <srcdir> <dstdir>"
-    print "Syntax: mediaworker rmdir <srcdir> <pattern1,pattern2>"
+    print("Syntax: mediaworker photo,video <srcdir> <dstdir>")
+    print("Syntax: mediaworker rmdir <srcdir> <pattern1,pattern2>")
 
 def fixdir(d):
     d = d.replace("\\", "/")
