@@ -33,21 +33,23 @@ class photo:
         exifdata = {}
 
         for ext in PHOTOMASK.split(","):
-            pipe = subprocess.Popen("exiv2.exe -PEIXkt \"%s\\*.%s\"" % (path, ext), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-            if pipe != None:
-                lines = pipe.read().decode("UTF-8")
-                for line in lines.split("\n"):
-                    if "DateTime" in line:
-                        for i in [DTORIG, DTDIG, DTDIG2, DT]:
-                            if i in line:
-                                match = [j.strip() for j in line.split(i)]
-                                if match[0] not in exifdata.keys():
-                                    exifdata[match[0]] = {}
+            for f in glob.iglob("%s\\*.%s" % (path, ext)):
+                print("Reading %s" % f)
+                pipe = subprocess.Popen("exiv2.exe -PEIXkt \"%s\"" % (f), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+                if pipe != None:
+                    lines = pipe.read().decode("UTF-8")
+                    for line in lines.split("\n"):
+                        if "DateTime" in line:
+                            for i in [DTORIG, DTDIG, DTDIG2, DT]:
+                                if i in line:
+                                    match = [j.strip() for j in line.split(i)]
+                                    if f not in exifdata.keys():
+                                        exifdata[f] = {}
 
-                                try:
-                                    exifdata[match[0]][i] = time.strptime(match[1], "%Y:%m:%d %H:%M:%S")
-                                except:
-                                    print("Error with %s format" % match[1].strip())
+                                    try:
+                                        exifdata[f][i] = time.strptime(match[1], "%Y:%m:%d %H:%M:%S")
+                                    except:
+                                        print("Error with %s format" % match[1].strip())
 
         return exifdata
 
