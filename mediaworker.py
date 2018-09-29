@@ -22,7 +22,7 @@ PHOTODST = "%Y/%m - %b/%Y-%m-%d_%H%M%S"
 PHOTOMASK = "jpg"
 VIDEO = "videos"
 VIDEODST = "%Y/%m - %b/%Y-%m-%d_"
-VIDEOMASK = "mov,avi,mp4"
+VIDEOMASK = "mov,avi,mp4,mpg"
 
 class photo:
     def __init__(self, src, dst, queue):
@@ -37,7 +37,7 @@ class photo:
                 print("Reading %s" % f)
                 pipe = subprocess.Popen("exiv2.exe -PEIXkt \"%s\"" % (f), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
                 if pipe != None:
-                    lines = pipe.read().decode("UTF-8")
+                    lines = pipe.read().decode("latin-1")
                     for line in lines.split("\n"):
                         if "DateTime" in line:
                             for i in [DTORIG, DTDIG, DTDIG2, DT]:
