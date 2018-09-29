@@ -19,10 +19,10 @@ DT = "Exif.Image.DateTime"
 OPERATION = "move"
 PHOTO = "photos"
 PHOTODST = "%Y/%m - %b/%Y-%m-%d_%H%M%S"
-PHOTOMASK = "jpg"
+PHOTOMASK = "jpg,JPG"
 VIDEO = "videos"
 VIDEODST = "%Y/%m - %b/%Y-%m-%d_"
-VIDEOMASK = "mov,avi,mp4,mpg"
+VIDEOMASK = "mov,avi,mp4,mpg,mts,MOV,AVI,MP4,MPG,MTS"
 
 class photo:
     def __init__(self, src, dst, queue):
@@ -33,9 +33,9 @@ class photo:
         exifdata = {}
 
         for ext in PHOTOMASK.split(","):
-            for f in glob.iglob("%s\\*.%s" % (path, ext)):
+            for f in glob.iglob(path + os.path.sep + "*." + ext):
                 print("Reading %s" % f)
-                pipe = subprocess.Popen("exiv2.exe -PEIXkt \"%s\"" % (f), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+                pipe = subprocess.Popen("exiv2 -PEIXkt \"%s\"" % (f), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
                 if pipe != None:
                     lines = pipe.read().decode("latin-1")
                     for line in lines.split("\n"):
@@ -47,7 +47,10 @@ class photo:
                                         exifdata[f] = {}
 
                                     try:
-                                        exifdata[f][i] = time.strptime(match[1], "%Y:%m:%d %H:%M:%S")
+                                        try:
+                                            exifdata[f][i] = time.strptime(match[1], "%Y:%m:%d %H:%M:%S")
+                                        except:
+                                            exifdata[f][i] = time.strptime(match[1], "%Y-%m-%d %H:%M:%S")
                                     except:
                                         print("Error with %s format" % match[1].strip())
 
